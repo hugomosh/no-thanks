@@ -1,4 +1,16 @@
-import { GamePhase, GameState, Player } from "./types";
+// src/game/gameEngine.ts
+import { Player } from "../lib/types";
+
+interface GameState {
+  players: Player[];
+  currentPlayerIndex: number;
+  deck: number[];
+  currentCard: number | null;
+  tokensOnCard: number;
+  removedCards: number[];
+  phase: "waiting" | "playing" | "ended";
+  winner: string | null;
+}
 
 export class NoThanksGame {
   private state: GameState;
@@ -18,26 +30,23 @@ export class NoThanksGame {
       currentCard: null,
       tokensOnCard: 0,
       removedCards: [],
-      phase: GamePhase.WAITING,
+      phase: "waiting",
       winner: null,
     };
   }
 
   private initializeDeck(): number[] {
-    // Create array of numbers 3-35
     const deck = Array.from({ length: 33 }, (_, i) => i + 3);
-    // Remove 9 random cards
     for (let i = 0; i < 9; i++) {
       const index = Math.floor(Math.random() * deck.length);
       this.state.removedCards.push(deck.splice(index, 1)[0]);
     }
-    // Shuffle remaining deck
     return deck.sort(() => Math.random() - 0.5);
   }
 
   public joinGame(playerId: string, playerName: string): boolean {
     if (
-      this.state.phase !== GamePhase.WAITING ||
+      this.state.phase !== "waiting" ||
       this.state.players.length >= this.MAX_PLAYERS ||
       this.state.players.some((p) => p.id === playerId)
     ) {
@@ -49,21 +58,26 @@ export class NoThanksGame {
       name: playerName,
       tokens: this.INITIAL_TOKENS,
       cards: [],
-      isActive: false,
+      is_active: false,
+      is_ready: false,
+      room_id: "", // This will be set by Supabase
+      created_at: new Date().toISOString(),
     });
 
     return true;
   }
 
   public startGame(): boolean {
-    if (this.state.players.length < this.MIN_PLAYERS || this.state.phase !== GamePhase.WAITING) {
+    if (this.state.players.length < this.MIN_PLAYERS || this.state.phase !== "waiting") {
       return false;
     }
 
     this.state.deck = this.initializeDeck();
     this.state.currentCard = this.state.deck.pop() ?? null;
-    this.state.phase = GamePhase.PLAYING;
-    this.state.players[0].isActive = true;
+    this.state.phase = "playing";
+    if (this.state.players[0]) {
+      this.state.players[0].is_active = true;
+    }
 
     return true;
   }
@@ -74,36 +88,37 @@ export class NoThanksGame {
       return false;
     }
 
-    // Give player the current card and tokens
-    currentPlayer.cards.push(this.state.currentCard!);
-    currentPlayer.tokens += this.state.tokensOnCard;
-    this.state.tokensOnCard = 0;
+    if (currentPlayer && this.state.currentCard !== null) {
+      currentPlayer.cards.push(this.state.currentCard);
+      currentPlayer.tokens += this.state.tokensOnCard;
+      this.state.tokensOnCard = 0;
+      this.drawNextCard();
+    }
 
-    // Draw next card or end game if deck is empty
-    this.drawNextCard();
     return true;
   }
 
   public placeToken(playerId: string): boolean {
     const currentPlayer = this.getCurrentPlayer();
-    if (!this.canTakeAction(playerId, currentPlayer) || currentPlayer.tokens === 0) {
+    if (
+      !currentPlayer ||
+      !this.canTakeAction(playerId, currentPlayer) ||
+      currentPlayer.tokens === 0
+    ) {
       return false;
     }
 
-    // Place token
     currentPlayer.tokens--;
     this.state.tokensOnCard++;
-
-    // Move to next player
     this.moveToNextPlayer();
     return true;
   }
 
   private canTakeAction(playerId: string, currentPlayer: Player | undefined): boolean {
     return (
-      this.state.phase === GamePhase.PLAYING &&
+      this.state.phase === "playing" &&
       currentPlayer?.id === playerId &&
-      currentPlayer.isActive &&
+      currentPlayer.is_active &&
       this.state.currentCard !== null
     );
   }
@@ -113,9 +128,16 @@ export class NoThanksGame {
   }
 
   private moveToNextPlayer(): void {
-    this.state.players[this.state.currentPlayerIndex].isActive = false;
-    this.state.currentPlayerIndex = (this.state.currentPlayerIndex + 1) % this.state.players.length;
-    this.state.players[this.state.currentPlayerIndex].isActive = true;
+    const currentPlayer = this.getCurrentPlayer();
+    if (currentPlayer) {
+      currentPlayer.is_active = false;
+      this.state.currentPlayerIndex =
+        (this.state.currentPlayerIndex + 1) % this.state.players.length;
+      const nextPlayer = this.getCurrentPlayer();
+      if (nextPlayer) {
+        nextPlayer.is_active = true;
+      }
+    }
   }
 
   private drawNextCard(): void {
@@ -128,7 +150,7 @@ export class NoThanksGame {
   }
 
   private endGame(): void {
-    this.state.phase = GamePhase.ENDED;
+    this.state.phase = "ended";
     this.state.winner = this.calculateWinner();
   }
 
@@ -143,16 +165,14 @@ export class NoThanksGame {
 
   private calculatePlayerScore(player: Player): number {
     const sortedCards = [...player.cards].sort((a, b) => a - b);
-    let score = -player.tokens; // Start with negative tokens
+    let score = -player.tokens;
 
     let i = 0;
     while (i < sortedCards.length) {
       let j = i;
-      // Find consecutive sequence
       while (j + 1 < sortedCards.length && sortedCards[j + 1] === sortedCards[j] + 1) {
         j++;
       }
-      // Add only the lowest card in the sequence
       score += sortedCards[i];
       i = j + 1;
     }

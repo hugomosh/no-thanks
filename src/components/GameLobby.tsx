@@ -1,33 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
 
 const GameLobby = () => {
   const navigate = useNavigate();
-  const [playerName, setPlayerName] = useState('');
-  const [roomCode, setRoomCode] = useState('');
+  const [playerName, setPlayerName] = useState("");
+  const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const createRoom = async () => {
     if (!playerName.trim()) {
-      setError('Please enter your name');
+      setError("Please enter your name");
       return;
     }
 
     try {
       // Create room
-      const { data: roomId, error: roomError } = await supabase
-        .rpc('create_room');
+      const { data: roomId, error: roomError } = await supabase.rpc("create_room");
 
       if (roomError) throw roomError;
 
       // Join as first player
       const { data: player, error: playerError } = await supabase
-        .from('players')
+        .from("players")
         .insert({
           room_id: roomId,
           name: playerName,
-          is_ready: true
+          is_ready: true,
         })
         .select()
         .single();
@@ -35,37 +34,37 @@ const GameLobby = () => {
       if (playerError) throw playerError;
 
       // Store player ID in localStorage
-      localStorage.setItem('playerId', player.id);
+      localStorage.setItem("playerId", player.id);
 
       // Navigate to room
       navigate(`/room/${roomId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create room');
+      setError(err instanceof Error ? err.message : "Failed to create room");
     }
   };
 
   const joinRoom = async () => {
     if (!playerName.trim() || !roomCode.trim()) {
-      setError('Please enter your name and room code');
+      setError("Please enter your name and room code");
       return;
     }
 
     try {
       // Find room
       const { data: room, error: roomError } = await supabase
-        .from('rooms')
-        .select('id')
-        .eq('code', roomCode.toUpperCase())
+        .from("rooms")
+        .select("id")
+        .eq("code", roomCode.toUpperCase())
         .single();
 
-      if (roomError) throw new Error('Room not found');
+      if (roomError) throw new Error("Room not found");
 
       // Join room
       const { data: player, error: playerError } = await supabase
-        .from('players')
+        .from("players")
         .insert({
           room_id: room.id,
-          name: playerName
+          name: playerName,
         })
         .select()
         .single();
@@ -73,12 +72,12 @@ const GameLobby = () => {
       if (playerError) throw playerError;
 
       // Store player ID in localStorage
-      localStorage.setItem('playerId', player.id);
+      localStorage.setItem("playerId", player.id);
 
       // Navigate to room
       navigate(`/room/${room.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to join room');
+      setError(err instanceof Error ? err.message : "Failed to join room");
     }
   };
 
@@ -95,9 +94,7 @@ const GameLobby = () => {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Your Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
             <input
               type="text"
               value={playerName}
@@ -126,9 +123,7 @@ const GameLobby = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Room Code
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Room Code</label>
             <input
               type="text"
               value={roomCode}

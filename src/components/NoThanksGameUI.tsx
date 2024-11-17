@@ -1,9 +1,17 @@
 // src/components/NoThanksGameUI.tsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AlertCircle, Coins, User } from "lucide-react";
 import { supabase } from "../lib/supabase";
-import type { Room, Player } from "../lib/supabase";
+import { Room, Player } from "../lib/types";
+
+export type PlayerScore = {
+  id: string;
+  name: string;
+  score: number;
+  cards: number[];
+  tokens: number;
+};
 
 const calculatePlayerScore = (player: Player) => {
   const sortedCards = [...(player.cards || [])].sort((a, b) => a - b);
@@ -241,10 +249,11 @@ const NoThanksGameUI = () => {
   };
 
   const handleTakeCard = async () => {
-    if (!room || !currentPlayer) return;
+    if (!room || !currentPlayer || room.current_card === null) return;
 
     try {
       setError(null);
+
       console.log("Taking card - Initial state:", {
         currentCard: room.current_card,
         deck: room.deck,
@@ -252,8 +261,8 @@ const NoThanksGameUI = () => {
       });
 
       // Update player's cards and tokens
-      const updatedCards = [...(currentPlayer.cards || []), room.current_card];
-      const updatedTokens = (currentPlayer.tokens || 0) + (room.tokens_on_card || 0);
+      const updatedCards: number[] = [...(currentPlayer.cards || []), room.current_card];
+      const updatedTokens = currentPlayer.tokens + (room.tokens_on_card || 0);
 
       // Get next card from deck
       const updatedDeck = [...(room.deck || [])];
