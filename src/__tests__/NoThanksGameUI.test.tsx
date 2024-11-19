@@ -1,38 +1,8 @@
-import { vi } from "vitest";
-
-const mockSupabase = {
-  channel: vi.fn(() => ({
-    on: vi.fn().mockReturnThis(),
-    subscribe: vi.fn(),
-    unsubscribe: vi.fn(),
-  })),
-  from: vi.fn(() => ({
-    select: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    single: vi.fn(),
-    execute: vi.fn(),
-  })),
-};
-
-// Mock modules
-vi.mock("@supabase/supabase-js", () => ({
-  createClient: () => mockSupabase,
-}));
-
-vi.mock("@testing-library/user-event", () => ({
-  default: {
-    click: vi.fn(),
-    type: vi.fn(),
-  },
-}));
-
-// Now import everything else
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { BrowserRouter } from "react-router-dom";
 import NoThanksGameUI from "../components/NoThanksGameUI";
+import { mockSupabase } from "../test/setup";
 
 // Test data
 const mockGameStates = {
@@ -114,6 +84,21 @@ describe("NoThanksGameUI", () => {
     vi.clearAllMocks();
     localStorage.clear();
     localStorage.setItem("playerId", "p1");
+
+    // Reset mock implementations
+    mockSupabase
+      .from()
+      .select()
+      .eq()
+      .single.mockReset()
+      .mockResolvedValue({ data: mockGameStates.playing, error: null });
+
+    mockSupabase
+      .from()
+      .select()
+      .eq()
+      .execute.mockReset()
+      .mockResolvedValue({ data: mockPlayers.standard, error: null });
   });
 
   it("renders loading state initially", () => {
