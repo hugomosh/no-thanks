@@ -174,6 +174,20 @@ const NoThanksGameUI = () => {
     }
   }, [room?.status, players]);
 
+  useEffect(() => {
+    if (room && players.length > 0) {
+      console.log("Turn state:", {
+        currentPlayerIndex: room.current_player_index,
+        players: players.map((p) => ({
+          id: p.id,
+          name: p.name,
+          isActive: p.is_active,
+        })),
+        activePlayer: players.find((p) => p.is_active)?.name,
+      });
+    }
+  }, [room?.current_player_index, players]);
+
   // Game actions
   const handleNewGame = async () => {
     if (!room) return;
@@ -253,38 +267,28 @@ const NoThanksGameUI = () => {
 
     try {
       setError(null);
-
-      console.log("Taking card - Initial state:", {
+      console.log("Taking card - Current state:", {
         currentCard: room.current_card,
         deck: room.deck,
-        playerCards: currentPlayer.cards,
-      });
-
-      // Update player's cards and tokens
-      const updatedCards: number[] = [...(currentPlayer.cards || []), room.current_card];
-      const updatedTokens = currentPlayer.tokens + (room.tokens_on_card || 0);
-
-      // Get next card from deck
-      const updatedDeck = [...(room.deck || [])];
-      const nextCard = updatedDeck.length > 0 ? updatedDeck.pop() : null;
-
-      console.log("Card taken - New state:", {
-        updatedCards,
-        nextCard,
-        remainingDeck: updatedDeck,
+        currentPlayerIndex: room.current_player_index,
+        playerCount: players.length,
+        currentPlayerId: currentPlayer.id,
       });
 
       // Update player state - keep them active since they took a card
       const { error: playerError } = await supabase
         .from("players")
         .update({
-          cards: updatedCards,
-          tokens: updatedTokens,
-          // Don't change is_active here - player should remain active
+          cards: [...(currentPlayer.cards || []), room.current_card],
+          tokens: currentPlayer.tokens + (room.tokens_on_card || 0),
         })
         .eq("id", currentPlayer.id);
 
       if (playerError) throw playerError;
+
+      // Get next card from deck
+      const updatedDeck = [...(room.deck || [])];
+      const nextCard = updatedDeck.length > 0 ? updatedDeck.pop() : null;
 
       // Update room state
       const { error: roomError } = await supabase
@@ -299,6 +303,12 @@ const NoThanksGameUI = () => {
         .eq("id", room.id);
 
       if (roomError) throw roomError;
+
+      console.log("Card taken - New state:", {
+        nextCard,
+        remainingDeck: updatedDeck?.length,
+        currentPlayerStillActive: currentPlayer.id,
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to take card");
       console.error("Error taking card:", err);
@@ -311,12 +321,21 @@ const NoThanksGameUI = () => {
     try {
       setError(null);
       console.log("Placing token - Initial state:", {
-        currentTokens: currentPlayer.tokens,
-        tokensOnCard: room.tokens_on_card,
+        currentPlayerIndex: room.current_player_index,
+        playerCount: players.length,
+        currentPlayerId: currentPlayer.id,
       });
 
-      // Update player's tokens and set them as inactive
-      const { error: playerError } = await supabase
+      // Calculate next player index
+      const nextPlayerIndex = (room.current_player_index + 1) % players.length;
+      const nextPlayer = players[nextPlayerIndex];
+
+      if (!nextPlayer) {
+        throw new Error("Next player not found");
+      }
+
+      // Deactivate current player
+      const { error: currentPlayerError } = await supabase
         .from("players")
         .update({
           tokens: currentPlayer.tokens - 1,
@@ -324,10 +343,17 @@ const NoThanksGameUI = () => {
         })
         .eq("id", currentPlayer.id);
 
-      if (playerError) throw playerError;
+      if (currentPlayerError) throw currentPlayerError;
 
-      // Find next player index
-      const nextPlayerIndex = (room.current_player_index + 1) % players.length;
+      // Activate next player
+      const { error: nextPlayerError } = await supabase
+        .from("players")
+        .update({
+          is_active: true,
+        })
+        .eq("id", nextPlayer.id);
+
+      if (nextPlayerError) throw nextPlayerError;
 
       // Update room state
       const { error: roomError } = await supabase
@@ -340,16 +366,9 @@ const NoThanksGameUI = () => {
 
       if (roomError) throw roomError;
 
-      // Activate next player
-      const { error: nextPlayerError } = await supabase
-        .from("players")
-        .update({ is_active: true })
-        .eq("id", players[nextPlayerIndex].id);
-
-      if (nextPlayerError) throw nextPlayerError;
-
       console.log("Token placed - New state:", {
         nextPlayerIndex,
+        nextPlayerId: nextPlayer.id,
         newTokensOnCard: (room.tokens_on_card || 0) + 1,
       });
     } catch (err) {
@@ -357,7 +376,6 @@ const NoThanksGameUI = () => {
       console.error("Error placing token:", err);
     }
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 p-8 flex items-center justify-center">
@@ -381,6 +399,31 @@ const NoThanksGameUI = () => {
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
         {/* Game Header */}
+        {room.status === "playing" && (
+          <div className="mt-4 bg-blue-100 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-blue-800">
+                Current Turn:{" "}
+                <span className="font-bold">
+                  {players[room.current_player_index]?.name}
+                  {players[room.current_player_index]?.id === currentPlayer?.id && " (You)"}
+                </span>
+              </div>
+              <div className="text-sm text-blue-600">
+                {players.map((player, index) => (
+                  <span
+                    key={player.id}
+                    className={`mx-1 ${
+                      index === room.current_player_index ? "font-bold" : "opacity-50"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-800">No Thanks!</h1>
