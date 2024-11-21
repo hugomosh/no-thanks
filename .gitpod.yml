@@ -1,20 +1,35 @@
 # .gitpod.yml
+
+image:
+  file: .gitpod.Dockerfile
+
 tasks:
-  - name: Install Dependencies & Start Dev Server
+  - name: install cypress to workspace
     init: |
       npm install
-    command: |
+      npx cypress install
       npm run dev
-
+  - name: run chrome tests
+    command: |
+      gp sync-await
+      yes | npx cypress run --browser chrome
+  - name: open cypress application
+    command: |
+      gp sync-done
+      yes | npx cypress open
   - name: Supabase Setup
     init: |
-      npm install -g supabase
+      npm install supabase
       supabase init
       supabase start
     command: |
       echo "Supabase is running"
 
 ports:
+  - port: 5900
+    onOpen: ignore
+  - port: 6080
+    onOpen: open-preview
   - port: 5173
     onOpen: open-preview
     visibility: public
