@@ -1,0 +1,30 @@
+# .gitpod.yml
+tasks:
+  - name: Install Dependencies & Start Dev Server
+    init: |
+      npm install
+    command: |
+      npm run dev
+
+  - name: Supabase Setup
+    init: |
+      npm install -g supabase
+      supabase init
+      supabase start
+    command: |
+      echo "Supabase is running"
+
+ports:
+  - port: 5173
+    onOpen: open-preview
+    visibility: public
+  - port: 54323
+    onOpen: ignore
+    visibility: public
+  # Supabase ports
+  - port: 54321
+    onOpen: ignore
+    visibility: public
+  - port: 54322
+    onOpen: ignore
+    visibility: public
