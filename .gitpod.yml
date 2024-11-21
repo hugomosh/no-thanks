@@ -19,8 +19,8 @@ tasks:
       yes | npx cypress open
   - name: Supabase Setup
     init: |
-      npm install supabase
-      supabase init
+      echo 'export PATH="'$(cd node_modules/.bin/ && pwd)':$PATH"' >> ~/.bash_profile
+      source ~/.bash_profile
       supabase start
     command: |
       echo "Supabase is running"
