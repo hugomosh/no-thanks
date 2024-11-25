@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Users, UserPlus, Link as LinkIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import { supabase } from "../lib/supabase";
 
 const GameLobby = () => {
   const [playerName, setPlayerName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState<String | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const navigate = useNavigate();
 
   const createRoom = async () => {
     if (!playerName.trim()) {
@@ -13,7 +17,24 @@ const GameLobby = () => {
       return;
     }
     setError(null);
-    // Add your room creation logic here
+
+    try {
+      const { data, error: dbError } = await supabase.rpc("create_room", {
+        player_name: playerName.trim(),
+      });
+
+      if (dbError) throw dbError;
+
+      if (data && data[0]) {
+        const { room_id, room_code, player_id } = data[0];
+        navigate(`/room/${room_code}`, {
+          state: { playerId: player_id, roomId: room_id },
+        });
+      }
+    } catch (err) {
+      setError("Failed to create room. Please try again.");
+      console.error("Error creating room:", err);
+    }
   };
 
   const joinRoom = async () => {
