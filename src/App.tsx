@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import GameLobby from "./components/GameLobby";
+import GameRoom from "./components/GameRoom";
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
     >
       <Routes>
         <Route path="/" element={<GameLobby />} />
+        <Route path="/room/:code" element={<GameRoom />} />
       </Routes>
     </BrowserRouter>
   );
