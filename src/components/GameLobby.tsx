@@ -11,8 +11,7 @@ const GameLobby = () => {
   const [isJoining, setIsJoining] = useState(false);
   const navigate = useNavigate();
 
-  const createRoom = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
+  const createRoom = async () => {
     if (!playerName.trim()) {
       setError("Please enter your name first");
       return;
@@ -50,6 +49,16 @@ const GameLobby = () => {
     // Add your room joining logic here
   };
 
+  const handleKeyDown = (event: { key: string }) => {
+    if (event.key === "Enter") {
+      if (isJoining) {
+        joinRoom();
+      } else {
+        createRoom();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4 flex items-center justify-center">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
@@ -62,7 +71,7 @@ const GameLobby = () => {
           </p>
         </div>
 
-        <form onSubmit={createRoom} className="space-y-4">
+        <div className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 rounded-md p-3 text-sm">
               {error}
@@ -79,6 +88,7 @@ const GameLobby = () => {
               id="playerName"
               type="text"
               value={playerName}
+              onKeyDown={handleKeyDown}
               onChange={(e) => setPlayerName(e.target.value)}
               placeholder="Enter your name"
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
@@ -113,7 +123,7 @@ const GameLobby = () => {
             </div>
           ) : (
             <button
-              type="submit"
+              onClick={createRoom}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md flex items-center justify-center transition-colors"
             >
               <UserPlus className="mr-2 h-5 w-5" />
@@ -146,7 +156,7 @@ const GameLobby = () => {
               </>
             )}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
