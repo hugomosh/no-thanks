@@ -37,32 +37,42 @@ CREATE TABLE players (
     last_seen TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
 );
 
--- Create function to generate 3-letter word code
+-- Create function to generate 3-word code
 CREATE OR REPLACE FUNCTION generate_room_code()
 RETURNS TEXT AS $$
 DECLARE
-    words TEXT[] := ARRAY[
+    simple_words TEXT[] := ARRAY[
         'cat', 'dog', 'pig', 'bat', 'fox', 'owl', 'bee', 'ant', 'fly',
-        'rat', 'bug', 'hen', 'cow', 'ape', 'elk', 'eel', 'ram', 'ray'
+        'rat', 'bug', 'hen', 'cow', 'ape', 'elk', 'eel', 'ram', 'ray',
+        'kit', 'pup', 'cub', 'kid', 'hog', 'jay', 'koi', 'yak', 'boa',
+        'web', 'egg', 'fin', 'ear', 'eye', 'leg', 'arm', 'sun', 'sky'
     ];
-    selected_word TEXT;
+    word1 TEXT;
+    word2 TEXT;
+    word3 TEXT;
+    generated_code TEXT;
     code_exists BOOLEAN;
 BEGIN
     LOOP
-        -- Select a random word from the array
-        selected_word := words[floor(random() * array_length(words, 1) + 1)];
+        -- Select three random words from the array
+        word1 := simple_words[floor(random() * array_length(simple_words, 1) + 1)];
+        word2 := simple_words[floor(random() * array_length(simple_words, 1) + 1)];
+        word3 := simple_words[floor(random() * array_length(simple_words, 1) + 1)];
+        
+        -- Combine words with hyphens
+        generated_code := word1 || '-' || word2 || '-' || word3;
         
         -- Check if code exists in active rooms
         SELECT EXISTS (
             SELECT 1 
             FROM rooms 
-            WHERE code = selected_word 
+            WHERE code = generated_code 
             AND status != 'finished'
         ) INTO code_exists;
         
         -- Exit loop if code doesn't exist
         IF NOT code_exists THEN
-            RETURN selected_word;
+            RETURN generated_code;
         END IF;
     END LOOP;
 END;
