@@ -11,7 +11,8 @@ const GameLobby = () => {
   const [isJoining, setIsJoining] = useState(false);
   const navigate = useNavigate();
 
-  const createRoom = async () => {
+  const createRoom = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
     if (!playerName.trim()) {
       setError("Please enter your name first");
       return;
@@ -61,13 +62,12 @@ const GameLobby = () => {
           </p>
         </div>
 
-        <div className="space-y-4">
+        <form onSubmit={createRoom} className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 rounded-md p-3 text-sm">
               {error}
             </div>
           )}
-
           <div className="space-y-2">
             <label
               htmlFor="playerName"
@@ -113,7 +113,7 @@ const GameLobby = () => {
             </div>
           ) : (
             <button
-              onClick={createRoom}
+              type="submit"
               className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md flex items-center justify-center transition-colors"
             >
               <UserPlus className="mr-2 h-5 w-5" />
@@ -146,7 +146,7 @@ const GameLobby = () => {
               </>
             )}
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
