@@ -9,6 +9,7 @@ const GameLobby = () => {
   const [roomCode, setRoomCode] = useState("");
   const [error, setError] = useState<String | null>(null);
   const [isJoining, setIsJoining] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const createRoom = async () => {
@@ -17,6 +18,7 @@ const GameLobby = () => {
       return;
     }
     setError(null);
+    setIsLoading(true);
 
     try {
       const { data, error: dbError } = await supabase.rpc("create_room", {
@@ -46,7 +48,43 @@ const GameLobby = () => {
       setError("Please enter a room code");
       return;
     }
-    // Add your room joining logic here
+
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const { data, error: dbError } = await supabase.rpc("join_room", {
+        target_room_code: roomCode.trim().toLowerCase(),
+        player_name: playerName.trim(),
+      });
+
+      if (dbError) {
+        if (dbError.message.includes("not found")) {
+          throw new Error("Room not found");
+        } else if (dbError.message.includes("not accepting")) {
+          throw new Error("Game has already started");
+        } else if (dbError.message.includes("full")) {
+          throw new Error("Room is full");
+        }
+        throw dbError;
+      }
+
+      if (data && data[0]) {
+        const { room_id, room_code, player_id } = data[0];
+        navigate(`/room/${room_code}`, {
+          state: { playerId: player_id, roomId: room_id },
+        });
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to join room. Please try again."
+      );
+      console.error("Error joining room:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (event: { key: string }) => {
@@ -109,6 +147,7 @@ const GameLobby = () => {
                   type="text"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value)}
+                  onKeyDown={handleKeyDown}
                   placeholder="Enter room code"
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
                 />
@@ -141,6 +180,7 @@ const GameLobby = () => {
           </div>
 
           <button
+            id="secondaryAction"
             className="w-full border border-gray-300 hover:border-gray-400 bg-white text-gray-700 px-4 py-3 rounded-md flex items-center justify-center transition-colors"
             onClick={() => setIsJoining(!isJoining)}
           >
