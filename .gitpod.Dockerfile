@@ -2,7 +2,7 @@ FROM gitpod/workspace-full-vnc
 
 ENV CYPRESS_CACHE_FOLDER=/workspace/.cypress-cache
 
-# Install Cypress dependencies
+# Install Cypress dependencies 2
 RUN sudo apt-get update \
     && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libgtk2.0-0 \
@@ -15,3 +15,4 @@ RUN sudo apt-get update \
     xauth \
     xvfb \
     && sudo rm -rf /var/lib/apt/lists/*
+
