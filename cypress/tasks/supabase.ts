@@ -1,12 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 
 console.log("CUYSHBUN");
-console.log(process.env);
 
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_ANON_KEY;
-console.log({ url });
-console.log(Cypress.env);
+
+//console.log(Cypress.env());
 
 const supabase = createClient(url!, key!);
 

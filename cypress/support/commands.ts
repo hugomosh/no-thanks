@@ -1,5 +1,11 @@
 declare global {
   namespace Cypress {
+     interface CustomTasks {
+      createRoom(playerName: string): Promise<any>;
+      joinRoom(roomCode: string, playerName: string): Promise<any>;
+      getRoomPlayers(roomId: string): Promise<any[]>;
+      clearTestData(): Promise<void>;
+    }
     interface Chainable {
       createTestRoom(playerName: string): Chainable<any>;
       joinTestRoom(roomCode: string, playerName: string): Chainable<any>;

@@ -46,6 +46,7 @@ const GameRoom = () => {
 
     loadRoom();
 
+    const roomId = room?.id! || "no_room_id";
     // Subscribe to player changes
     const playersSubscription = supabase
       .channel("room_players")
@@ -55,14 +56,16 @@ const GameRoom = () => {
           event: "*",
           schema: "public",
           table: "players",
-          filter: `room_id=eq.${room?.id}`,
+          filter: `room_id=eq.${roomId}`,
         },
         (payload) => {
+          console.log({ payload });
+
           // Reload room data when players change
           loadRoom();
         }
       )
-      .subscribe();
+      .subscribe(console.log);
 
     // Cleanup subscription
     return () => {
@@ -124,6 +127,7 @@ const GameRoom = () => {
             </div>
 
             <div className="space-y-2">
+              <pre>{JSON.stringify(room, 1, 1)}</pre>
               {players.map((player) => (
                 <div
                   key={player.id}

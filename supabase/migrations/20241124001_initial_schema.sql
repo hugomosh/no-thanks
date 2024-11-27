@@ -112,3 +112,7 @@ BEGIN
     SELECT new_room_id, new_room_code, new_player_id;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Enable realtime for tables
+alter publication supabase_realtime add table rooms;
+alter publication supabase_realtime add table players;
