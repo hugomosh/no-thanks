@@ -1,13 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+console.log("CUYSHBUN");
+console.log(process.env);
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error("Missing Supabase environment variables");
-}
+const url = process.env.SUPABASE_URL;
+const key = process.env.SUPABASE_ANON_KEY;
+console.log({ url });
+console.log(Cypress.env);
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(url!, key!);
 
 export const tasks = {
   async createRoom(playerName: string) {
@@ -21,8 +22,8 @@ export const tasks = {
 
   async joinRoom(roomCode: string, playerName: string) {
     const { data, error } = await supabase.rpc("join_room", {
-      input_code: roomCode,
-      input_name: playerName,
+      target_room_code: roomCode,
+      player_name: playerName,
     });
 
     if (error) throw error;
