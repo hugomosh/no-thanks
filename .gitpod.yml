@@ -8,9 +8,25 @@ tasks:
   - name: Playwright Tests
     command: npm run test:e2e
 
+  - name: Supabase Setup
+    init: |
+      echo 'export PATH="'$(cd node_modules/.bin/ && pwd)':$PATH"' >> ~/.bash_profile
+      source ~/.bash_profile
+      supabase start
+    command: |
+      echo "Supabase is running"
+
 ports:
+  # Playwright
   - port: 5173
     onOpen: open-preview
+    visibility: public
+  # Supabase ports
+  - port: 54321
+    onOpen: ignore
+    visibility: public
+  - port: 54322
+    onOpen: ignore
     visibility: public
 
 vscode:
