@@ -31,6 +31,9 @@ test.describe("Room Creation", () => {
     // Create a room first
     await page.goto("/");
     await page.getByRole("button", { name: "Create Room" }).click();
+
+    // Check if we're redirected to a room page
+    await  page.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
     const roomUrl = page.url();
     const roomCode = await page.getByTestId("room-code").textContent();
 
@@ -44,6 +47,7 @@ test.describe("Room Creation", () => {
     await secondPlayer.getByRole("button", { name: "Join" }).click();
 
     // Verify redirect to room
+    await  secondPlayer.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
     await expect(secondPlayer.url()).toBe(roomUrl);
 
     // Verify player count updated in both browsers

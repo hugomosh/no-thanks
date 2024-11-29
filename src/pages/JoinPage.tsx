@@ -1,6 +1,6 @@
 // src/pages/JoinPage.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { supabase } from "../lib/supabase";
 
 export function JoinPage() {
@@ -9,23 +9,13 @@ export function JoinPage() {
   const [playerName, setPlayerName] = useState("");
 
   const handleJoin = async () => {
-    // First get room id
-    const { data: room } = await supabase
-      .from("rooms")
-      .select("id")
-      .eq("code", roomCode)
-      .single();
+    const { data, error } = await supabase.rpc("join_room", {
+      p_room_code: roomCode,
+      p_player_name: playerName,
+    });
 
-    if (room) {
-      // Add player to room
-      const { error } = await supabase.from("players").insert({
-        room_id: room.id,
-        name: playerName,
-      });
-
-      if (!error) {
-        navigate(`/room/${roomCode}`);
-      }
+    if (!error && data) {
+      navigate(`/room/${roomCode}`);
     }
   };
 

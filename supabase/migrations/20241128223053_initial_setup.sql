@@ -83,6 +83,54 @@ begin
 end;
 $$;
 
+-- Function to join a room
+create function join_room(p_room_code text, p_player_name text) returns json
+language plpgsql
+as $$
+declare
+  target_room_id uuid;
+  new_player_id uuid;
+  player_count integer;
+  new_position integer;
+begin
+  -- Get room id and validate room exists
+  select id into target_room_id 
+  from rooms 
+  where code = p_room_code;
+  
+  if not found then
+    return json_build_object(
+      'error', 'Room not found'
+    );
+  end if;
+
+  -- Check number of players
+  select count(*) into player_count 
+  from players 
+  where room_id = target_room_id;
+
+  if player_count >= 7 then
+    return json_build_object(
+      'error', 'Room is full (maximum 7 players)'
+    );
+  end if;
+
+  -- Set player position
+  new_position := player_count + 1;
+
+  -- Insert new player
+  insert into players (id, room_id, name, position)
+  values (gen_random_uuid(), target_room_id, p_player_name, new_position)
+  returning id into new_player_id;
+
+  return json_build_object(
+    'player_id', new_player_id,
+    'room_id', target_room_id,
+    'position', new_position
+  );
+end;
+$$;
+
 -- Enable realtime for our tables
 ALTER PUBLICATION supabase_realtime ADD TABLE rooms;
 ALTER PUBLICATION supabase_realtime ADD TABLE players;

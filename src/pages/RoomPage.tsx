@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { supabase } from "../lib/supabase";
-
+// src/pages/RoomPage.tsx
 export function RoomPage() {
   const { roomCode } = useParams();
   const [playerCount, setPlayerCount] = useState(1);
@@ -10,7 +10,6 @@ export function RoomPage() {
 
   useEffect(() => {
     const getRoom = async () => {
-      // First get the room id
       const { data: room } = await supabase
         .from("rooms")
         .select("id")
@@ -20,7 +19,6 @@ export function RoomPage() {
       if (room) {
         setRoomId(room.id);
 
-        // Then get the players count
         const { count } = await supabase
           .from("players")
           .select("id", { count: "exact" })
@@ -31,7 +29,36 @@ export function RoomPage() {
     };
 
     getRoom();
-  }, [roomCode]);
+
+    // Set up realtime subscription for players
+    const channel = supabase
+      .channel("room_players")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "players",
+          filter: `room_id=eq.${roomId}`,
+        },
+        async () => {
+          // Refresh player count on any change
+          if (roomId) {
+            const { count } = await supabase
+              .from("players")
+              .select("id", { count: "exact" })
+              .eq("room_id", roomId);
+
+            setPlayerCount(count || 1);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [roomCode, roomId]);
 
   return (
     <div>
