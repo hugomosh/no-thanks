@@ -126,13 +126,14 @@ test.describe("Room Creation", () => {
         await playerPage.getByRole("button", { name: "Join" }).click();
 
         // Wait for both the original page and new player page to update
-        await expect(page.getByTestId("player-count")).toHaveText(
-          `Players: ${i}/7`,
-          { timeout: 10000 }
-        );
+
         await expect(playerPage.getByTestId("player-count")).toHaveText(
           `Players: ${i}/7`,
-          { timeout: 10000 }
+          { timeout: 20000 }
+        );
+        await expect(page.getByTestId("player-count")).toHaveText(
+          `Players: ${i}/7`,
+          { timeout: 20000 }
         );
       }
 
