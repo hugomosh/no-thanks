@@ -1,20 +1,37 @@
-// src/pages/JoinPage.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 
 export function JoinPage() {
   const navigate = useNavigate();
   const [roomCode, setRoomCode] = useState("");
   const [playerName, setPlayerName] = useState("");
+  const [error, setError] = useState("");
 
   const handleJoin = async () => {
-    const { data, error } = await supabase.rpc("join_room", {
+    setError("");
+
+    if (!playerName.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+
+    const { data, error: supabaseError } = await supabase.rpc("join_room", {
       p_room_code: roomCode,
       p_player_name: playerName,
     });
 
-    if (!error && data) {
+    if (data?.error) {
+      setError(data.error);
+      return;
+    }
+
+    if (supabaseError) {
+      setError(supabaseError.message);
+      return;
+    }
+
+    if (data) {
       navigate(`/room/${roomCode}`);
     }
   };
@@ -34,6 +51,7 @@ export function JoinPage() {
         placeholder="Your Name"
       />
       <button onClick={handleJoin}>Join</button>
+      {error && <div data-testid="error-message">{error}</div>}
     </div>
   );
 }

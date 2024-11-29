@@ -2,11 +2,16 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { supabase } from "../lib/supabase";
-// src/pages/RoomPage.tsx
+
+type Player = {
+  name: string;
+};
+
 export function RoomPage() {
   const { roomCode } = useParams();
   const [playerCount, setPlayerCount] = useState(1);
   const [roomId, setRoomId] = useState<string | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
 
   useEffect(() => {
     const getRoom = async () => {
@@ -19,12 +24,17 @@ export function RoomPage() {
       if (room) {
         setRoomId(room.id);
 
-        const { count } = await supabase
+        // Get players
+        const { data: playersList } = await supabase
           .from("players")
-          .select("id", { count: "exact" })
-          .eq("room_id", room.id);
+          .select("name")
+          .eq("room_id", room.id)
+          .order("position");
 
-        setPlayerCount(count || 1);
+        if (playersList) {
+          setPlayers(playersList);
+          setPlayerCount(playersList.length);
+        }
       }
     };
 
@@ -65,6 +75,11 @@ export function RoomPage() {
       <div data-testid="room-code">{roomCode}</div>
       <div data-testid="waiting-message">Waiting for players to join...</div>
       <div data-testid="player-count">Players: {playerCount}/7</div>
+      <div data-testid="players-list">
+        {players.map((player, index) => (
+          <div key={index}>{player.name}</div>
+        ))}
+      </div>
     </div>
   );
 }

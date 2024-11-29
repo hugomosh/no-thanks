@@ -55,12 +55,13 @@ end;
 $$;
 
 -- Function to create a new room
-create function create_room() returns json
+create or replace function create_room(p_player_name text) returns json
 language plpgsql
 as $$
 declare
   new_room_code text;
   new_room_id uuid;
+  new_player_id uuid;
 begin
   -- Generate unique room code
   loop
@@ -76,9 +77,15 @@ begin
     end;
   end loop;
 
+  -- Create first player
+  insert into players (id, room_id, name, position)
+  values (gen_random_uuid(), new_room_id, p_player_name, 1)
+  returning id into new_player_id;
+
   return json_build_object(
     'room_id', new_room_id,
-    'room_code', new_room_code
+    'room_code', new_room_code,
+    'player_id', new_player_id
   );
 end;
 $$;
