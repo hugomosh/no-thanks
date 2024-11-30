@@ -82,6 +82,11 @@ begin
   values (gen_random_uuid(), new_room_id, p_player_name, 1)
   returning id into new_player_id;
 
+  -- Set creator as current player
+  update rooms 
+  set current_player = new_player_id
+  where id = new_room_id;
+  
   return json_build_object(
     'room_id', new_room_id,
     'room_code', new_room_code,

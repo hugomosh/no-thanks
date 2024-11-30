@@ -31,7 +31,9 @@ export function JoinPage() {
       return;
     }
 
-    if (data) {
+    if (!error && data && !data.error) {
+      // Store our player ID
+      localStorage.setItem(`player_id_${roomCode}`, data.player_id);
       navigate(`/room/${roomCode}`);
     }
   };

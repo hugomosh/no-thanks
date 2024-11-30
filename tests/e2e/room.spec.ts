@@ -155,4 +155,50 @@ test.describe("Room Creation", () => {
       console.log("Fin.");
     }
   });
+
+  test("should initialize game when creator starts it", async ({
+    browser,
+    page,
+  }) => {
+    // Create room
+    await page.goto("/");
+    await page.getByTestId("player-name").fill("Creator");
+    await page.getByRole("button", { name: "Create Room" }).click();
+    await page.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
+    const roomCode = await page.getByTestId("room-code").textContent();
+
+    // Add second player
+    const playerPage = await browser.newPage();
+    await playerPage.goto("/join");
+    await playerPage.getByTestId("room-input").fill(roomCode!);
+    await playerPage.getByTestId("player-name").fill("Player 2");
+    await playerPage.getByRole("button", { name: "Join" }).click();
+
+    // Wait for player to join
+    await expect(page.getByTestId("player-count")).toHaveText("Players: 2/7");
+
+    // Start game button should be visible to creator
+    await expect(
+      page.getByRole("button", { name: "Start Game" })
+    ).toBeVisible();
+
+    // But not to other players
+    await expect(
+      playerPage.getByRole("button", { name: "Start Game" })
+    ).not.toBeVisible();
+
+    // Creator starts game
+    await page.getByRole("button", { name: "Start Game" }).click();
+
+    // Verify game started in both views
+    await expect(page.getByTestId("game-status")).toHaveText("Game started");
+    await expect(playerPage.getByTestId("game-status")).toHaveText(
+      "Game started"
+    );
+
+    // Verify initial game state
+    await expect(page.getByTestId("current-card")).toBeVisible();
+    await expect(page.getByTestId("current-player")).toBeVisible();
+    await expect(page.getByTestId("tokens-count")).toHaveText("11");
+  });
 });
