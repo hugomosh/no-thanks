@@ -75,6 +75,7 @@ export function RoomPage() {
           filter: `code=eq.${roomCode}`,
         },
         (payload) => {
+          console.log("Room update:", JSON.stringify(payload.new));
           setStatus(payload.new.status);
           setCurrentPlayerId(payload.new.current_player);
         }
@@ -130,12 +131,27 @@ export function RoomPage() {
             <button onClick={handleStartGame}>Start Game</button>
           )}
         </>
+      ) : status === "finished" ? (
+        <>
+          <div data-testid="game-status">Game Over</div>
+          <div data-testid="final-scores">
+            {players.map((player) => (
+              <div key={player.id}>
+                {player.name}: {calculateScore(player)}
+              </div>
+            ))}
+          </div>
+        </>
       ) : (
-        <div>
+        <>
           <div data-testid="game-status">Game started</div>
           <GameBoard roomId={roomId!} playerId={myPlayerId!} />
-        </div>
+        </>
       )}
     </div>
   );
+}
+function calculateScore(player: Player): number {
+  // Add score calculation logic here
+  return 0;
 }

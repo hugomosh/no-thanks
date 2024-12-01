@@ -167,10 +167,30 @@ test.describe("Game Play", () => {
       page
     );
 
+    let previousCard = "";
     // Take cards until game ends (24 cards in deck)
     for (let i = 0; i < 24; i++) {
       await expect(activePlayer.getByTestId("current-card")).toBeVisible();
+
+      const currentCard = await activePlayer
+        .getByTestId("current-card")
+        .textContent();
+      if (previousCard) {
+        expect(currentCard).not.toBe(previousCard);
+      }
+      previousCard = currentCard!;
+
       await activePlayer.getByRole("button", { name: "Take Card" }).click();
+
+      // Wait for new card to be different (except on last card)
+      if (i < 23) {
+        await activePlayer.waitForFunction((oldCard) => {
+          const cardText = document.querySelector(
+            '[data-testid="current-card"]'
+          )?.textContent;
+          return cardText && cardText !== oldCard;
+        }, currentCard);
+      }
     }
 
     // Verify game ended

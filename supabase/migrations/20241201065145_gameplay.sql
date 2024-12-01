@@ -1,10 +1,5 @@
-create or replace function make_move(
-  p_room_id uuid,
-  p_player_id uuid,
-  p_action text
-) returns json
-language plpgsql
-as $$
+create
+or replace function make_move (p_room_id uuid, p_player_id uuid, p_action text) returns json language plpgsql as $$
 declare
   v_current_card integer;
   v_card_tokens integer;
@@ -12,11 +7,12 @@ declare
   v_player_tokens integer;
   v_player_position integer;
   v_total_players integer;
+  v_deck integer[];
 begin
   begin
     -- Get room info
-    select current_card, tokens_on_card
-    into v_current_card, v_card_tokens
+    select current_card, tokens_on_card, deck
+    into v_current_card, v_card_tokens, v_deck
     from rooms 
     where id = p_room_id
     for update;
@@ -51,20 +47,26 @@ begin
           tokens = tokens + v_card_tokens
       where id = p_player_id;
 
-      -- Draw next card from deck
-      update rooms
-      set current_card = (
-        case when array_length(deck, 1) > 0 
-        then deck[1] 
-        else null 
-        end
-      ),
-      deck = case when array_length(deck, 1) > 0 
-             then deck[2:array_length(deck, 1)]
-             else null
-             end,
-      tokens_on_card = 0
-      where id = p_room_id;
+      -- Keep same player as next
+      v_next_player_id := p_player_id;
+
+        -- Draw next card
+        if v_deck is null or cardinality(v_deck) = 0 then
+        -- This was the last card, end game
+        update rooms
+        set status = 'finished',
+            current_card = null,
+            tokens_on_card = 0,
+            deck = null  -- Explicitly set to null for consistency
+        where id = p_room_id;
+        else
+        -- Get next card from deck
+        update rooms
+        set current_card = v_deck[1],
+            deck = v_deck[2:array_length(v_deck, 1)],
+            tokens_on_card = 0
+        where id = p_room_id;
+        end if;
 
       -- No change in current_player when taking a card
 
