@@ -3,12 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { GameBoard } from "./GameBoard";
-
-type Player = {
-  id: string;
-  name: string;
-  position: number;
-};
+import { GameScore } from "../components/game/GameScore";
+import { Player } from "../types";
 
 type RoomStatus = "waiting" | "playing" | "finished";
 
@@ -41,7 +37,7 @@ export function RoomPage() {
 
         const { data: playersList } = await supabase
           .from("players")
-          .select("id, name, position")
+          .select("id, name, position, tokens, cards")
           .eq("room_id", room.id)
           .order("position");
 
@@ -134,13 +130,7 @@ export function RoomPage() {
       ) : status === "finished" ? (
         <>
           <div data-testid="game-status">Game Over</div>
-          <div data-testid="final-scores">
-            {players.map((player) => (
-              <div key={player.id}>
-                {player.name}: {calculateScore(player)}
-              </div>
-            ))}
-          </div>
+          <GameScore players={players} />
         </>
       ) : (
         <>
