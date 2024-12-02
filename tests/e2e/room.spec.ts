@@ -198,7 +198,7 @@ test.describe("Room Creation", () => {
 
     // Verify initial game state
     await expect(page.getByTestId("current-card")).toBeVisible();
-    await expect(page.getByTestId("current-player")).toBeVisible();
-    await expect(page.getByTestId("tokens-count")).toHaveText("11");
+    await expect(page.getByTestId("current-turn")).toBeVisible();
+    await expect(page.getByTestId("player-tokens-count")).toHaveText("11");
   });
 });

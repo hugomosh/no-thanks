@@ -113,7 +113,8 @@ export function GameBoard({ roomId, playerId }: GameBoardProps) {
           Current Card: {currentCard}
         </div>
         <div data-testid="card-tokens" className="text-xl">
-          Tokens on card: {cardTokens}
+          Tokens on card:{" "}
+          <span data-testid="card-tokens-count">{cardTokens}</span>
         </div>
       </div>
 
@@ -122,7 +123,10 @@ export function GameBoard({ roomId, playerId }: GameBoardProps) {
       </div>
 
       <div className="mb-4">
-        <div data-testid="player-tokens">Your tokens: {myPlayer?.tokens}</div>
+        <div data-testid="player-tokens">
+          Your tokens:{" "}
+          <span data-testid="player-tokens-count">{myPlayer?.tokens}</span>
+        </div>
         <div data-testid="player-cards">
           Your cards: {myPlayer?.cards.join(", ")}
         </div>
