@@ -14,7 +14,8 @@ export function GameScore({ players }: GameResultsProps) {
       <h2>Game Results</h2>
       {playerScores.map((player, index) => (
         <div key={player.id}>
-          {index + 1}. {player.name}: {player.score.score} points
+          {index + 1}. {player.name}:{" "}
+          <span data-testid="player-score">{player.score.score}</span> points
           <div className="text-sm">
             Cards: {player.cards.join(", ")} <br />
             Tokens: {player.tokens}

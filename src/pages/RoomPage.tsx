@@ -105,6 +105,15 @@ export function RoomPage() {
     }
   };
 
+  const handleStartNewGame = async () => {
+    if (roomId && myPlayerId) {
+      await supabase.rpc("start_new_game", {
+        p_room_id: roomId,
+        p_player_id: myPlayerId,
+      });
+    }
+  };
+
   const isCreator = players.find((p) => p.id === myPlayerId)?.position === 1;
   const canStartGame = isCreator && players.length >= 2 && status === "waiting";
 
@@ -131,6 +140,9 @@ export function RoomPage() {
         <>
           <div data-testid="game-status">Game Over</div>
           <GameScore players={players} />
+          {isCreator && ( // Only show to creator
+            <button onClick={handleStartNewGame}>Play Again</button>
+          )}
         </>
       ) : (
         <>
@@ -140,8 +152,4 @@ export function RoomPage() {
       )}
     </div>
   );
-}
-function calculateScore(player: Player): number {
-  // Add score calculation logic here
-  return 0;
 }

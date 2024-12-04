@@ -109,8 +109,8 @@ export function GameBoard({ roomId, playerId }: GameBoardProps) {
   return (
     <div className="p-4">
       <div className="mb-4">
-        <div data-testid="current-card" className="text-2xl">
-          Current Card: {currentCard}
+        <div className="text-2xl">
+          Current Card: <span data-testid="current-card">{currentCard}</span>
         </div>
         <div data-testid="card-tokens" className="text-xl">
           Tokens on card:{" "}

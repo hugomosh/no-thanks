@@ -147,7 +147,7 @@ test.describe("Game Play", () => {
     const newCard = await activePlayer
       .getByTestId("current-card")
       .textContent();
-    expect(newCard).not.toContain(currentCard);
+    expect(newCard).not.toBe(currentCard);
 
     // Verify both players see the same new card
     await expect(waitingPlayer.getByTestId("current-card")).toHaveText(
@@ -204,5 +204,56 @@ test.describe("Game Play", () => {
     // Verify final scores are shown
     await expect(activePlayer.getByTestId("final-scores")).toBeVisible();
     await expect(waitingPlayer.getByTestId("final-scores")).toBeVisible();
+  });
+
+  test("should allow starting a new game after game ends", async ({
+    browser,
+    page,
+  }) => {
+    const { activePlayer, waitingPlayer } = await setupTwoPlayerGame(
+      browser,
+      page
+    );
+
+    // Play 24 cards (the deck size)
+    for (let i = 0; i < 24; i++) {
+      // Take the current card
+      await activePlayer.getByRole("button", { name: "Take Card" }).click();
+
+      // For all except last card, wait for next card
+      if (i < 23) {
+        await activePlayer.waitForFunction(() => {
+          const cardText = document.querySelector(
+            '[data-testid="current-card"]'
+          )?.textContent;
+          return cardText && cardText.match(/\d+/);
+        });
+      }
+    }
+
+    // Wait for game over
+    await expect(activePlayer.getByTestId("game-status")).toHaveText(
+      "Game Over"
+    );
+
+    // Start new game
+    await page.getByRole("button", { name: "Play Again" }).click();
+
+    // Verify game restarted
+    await expect(activePlayer.getByTestId("game-status")).toHaveText(
+      "Game started"
+    );
+
+    // Verify both players see new game state
+    for (const player of [activePlayer, waitingPlayer]) {
+      // Should have initial tokens
+      await expect(player.getByTestId("player-tokens-count")).toHaveText("11");
+
+      // Should have no cards
+      // await expect(player.getByTestId("player-cards")).toHaveText("");
+
+      // Should see current card
+      await expect(player.getByTestId("current-card")).toBeVisible();
+    }
   });
 });
