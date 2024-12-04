@@ -1,6 +1,8 @@
 // src/components/game/GameBoard.tsx
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import { Room } from "../types";
 
 type Player = {
   id: string;
@@ -68,10 +70,12 @@ export function GameBoard({ roomId, playerId }: GameBoardProps) {
           table: "rooms",
           filter: `id=eq.${roomId}`,
         },
-        (payload) => {
-          setCurrentCard(payload.new.current_card);
-          setCurrentTurnPlayerId(payload.new.current_player);
-          setCardTokens(payload.new.tokens_on_card);
+        (payload: RealtimePostgresChangesPayload<Room>) => {
+          if (!payload.new) return;
+          const newRoom = payload.new as Room;
+          setCurrentCard(newRoom.current_card);
+          setCurrentTurnPlayerId(newRoom.current_player);
+          setCardTokens(newRoom.tokens_on_card);
         }
       )
       .on(

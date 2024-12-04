@@ -4,7 +4,8 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { GameBoard } from "./GameBoard";
 import { GameScore } from "../components/game/GameScore";
-import { Player } from "../types";
+import { Player, Room } from "../types";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 type RoomStatus = "waiting" | "playing" | "finished";
 
@@ -70,10 +71,11 @@ export function RoomPage() {
           table: "rooms",
           filter: `code=eq.${roomCode}`,
         },
-        (payload) => {
-          console.log("Room update:", JSON.stringify(payload.new));
-          setStatus(payload.new.status);
-          setCurrentPlayerId(payload.new.current_player);
+        (payload: RealtimePostgresChangesPayload<Room>) => {
+          if (!payload.new) return;
+          const newRoom = payload.new as Room;
+          setStatus(newRoom.status);
+          setCurrentPlayerId(newRoom.current_player);
         }
       )
       .on(
