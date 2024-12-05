@@ -3,9 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://hugomosh.github.io/no-thanks",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && cp dist/index.html dist/404.html",
     "deploy": "gh-pages -d dist",
     "lint": "eslint --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
