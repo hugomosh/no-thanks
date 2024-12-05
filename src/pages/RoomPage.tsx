@@ -13,7 +13,7 @@ export function RoomPage() {
   const { roomCode } = useParams();
   const [roomId, setRoomId] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
+  //const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
   const [status, setStatus] = useState<RoomStatus>("waiting");
 
@@ -34,7 +34,7 @@ export function RoomPage() {
       if (room) {
         setRoomId(room.id);
         setStatus(room.status);
-        setCurrentPlayerId(room.current_player);
+        //setCurrentPlayerId(room.current_player);
 
         const { data: playersList } = await supabase
           .from("players")
@@ -75,7 +75,7 @@ export function RoomPage() {
           if (!payload.new) return;
           const newRoom = payload.new as Room;
           setStatus(newRoom.status);
-          setCurrentPlayerId(newRoom.current_player);
+          //setCurrentPlayerId(newRoom.current_player);
         }
       )
       .on(
