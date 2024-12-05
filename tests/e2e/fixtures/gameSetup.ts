@@ -24,7 +24,7 @@ export async function setupTwoPlayerGame(
 
   // Second player joins
   const player2Page = await browser.newPage();
-  await player2Page.goto("/join");
+  await player2Page.goto("./join");
   await player2Page.getByTestId("room-input").fill(roomCode!);
   await player2Page.getByTestId("player-name").fill("Player 2");
   await player2Page.getByRole("button", { name: "Join" }).click();

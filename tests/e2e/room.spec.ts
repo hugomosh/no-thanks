@@ -63,7 +63,7 @@ test.describe("Room Creation", () => {
 
     // Open new browser context for second player
     const secondPlayer = await browser.newPage();
-    await secondPlayer.goto("/join");
+    await secondPlayer.goto("./join");
 
     // Join room
     await secondPlayer.getByTestId("room-input").fill(roomCode!);
@@ -95,7 +95,7 @@ test.describe("Room Creation", () => {
   });
 
   test("should show error when joining non-existent room", async ({ page }) => {
-    await page.goto("/join");
+    await page.goto("./join");
     await page.getByTestId("room-input").fill("cat-dog-bat");
     await page.getByTestId("player-name").fill("Player 1");
     await page.getByRole("button", { name: "Join" }).click();
@@ -120,7 +120,7 @@ test.describe("Room Creation", () => {
         const context = await browser.newContext();
         const playerPage = await context.newPage();
 
-        await playerPage.goto("/join");
+        await playerPage.goto("./join");
         await playerPage.getByTestId("room-input").fill(roomCode!);
         await playerPage.getByTestId("player-name").fill(`Player ${i}`);
         await playerPage.getByRole("button", { name: "Join" }).click();
@@ -143,7 +143,7 @@ test.describe("Room Creation", () => {
       const lastContext = await browser.newContext();
       const lastPage = await lastContext.newPage();
 
-      await lastPage.goto("/join");
+      await lastPage.goto("./join");
       await lastPage.getByTestId("room-input").fill(roomCode!);
       await lastPage.getByTestId("player-name").fill("Player 8");
       await lastPage.getByRole("button", { name: "Join" }).click();
@@ -169,7 +169,7 @@ test.describe("Room Creation", () => {
 
     // Add second player
     const playerPage = await browser.newPage();
-    await playerPage.goto("/join");
+    await playerPage.goto("./join");
     await playerPage.getByTestId("room-input").fill(roomCode!);
     await playerPage.getByTestId("player-name").fill("Player 2");
     await playerPage.getByRole("button", { name: "Join" }).click();
