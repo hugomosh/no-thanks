@@ -32,25 +32,39 @@ jobs:
           node-version: "18"
           cache: "npm"
 
-      - name: Install Supabase CLI
-        run: npm install -g supabase
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Start Supabase
-        run: |
-          supabase start
-          echo "ANON_KEY=$(supabase status --output json | jq -r '.api.anonKey')" >> $GITHUB_ENV
+      - name: Installing Supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
+      - name: Install Playwright
         run: npx playwright install --with-deps
 
+      - name: Start Supabase and debug
+        run: |
+          supabase init --force
+          supabase start
+          supabase db reset --debug
+          supabase status
+          echo "Checking database..."
+          psql postgres://postgres:postgres@localhost:54322/postgres -c "\dt"
+
       - name: Run Playwright tests
+        run: npx playwright test
         env:
           VITE_SUPABASE_URL: "http://localhost:54321"
-          VITE_SUPABASE_ANON_KEY: ${{ env.ANON_KEY }}
-        run: npx playwright test
+          VITE_SUPABASE_ANON_KEY: $(supabase status --output json | jq -r '.api.anonKey')
+          CI: true
+          DEBUG: pw:api
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
