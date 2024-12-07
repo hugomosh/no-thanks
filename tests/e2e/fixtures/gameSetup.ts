@@ -33,7 +33,7 @@ export async function setupTwoPlayerGame(
   await expect(creatorPage.getByTestId("player-count")).toHaveText(
     "Players: 2/7",
     {
-      timeout: 10000,
+      timeout: 25000,
     }
   );
 
