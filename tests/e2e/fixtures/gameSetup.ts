@@ -22,12 +22,16 @@ export async function setupTwoPlayerGame(
   await creatorPage.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
   const roomCode = await creatorPage.getByTestId("room-code").textContent();
 
+  // Add small delay to ensure room is saved
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
   // Second player joins
   const player2Page = await browser.newPage();
   await player2Page.goto("./join");
   await player2Page.getByTestId("room-input").fill(roomCode!);
   await player2Page.getByTestId("player-name").fill("Player 2");
   await player2Page.getByRole("button", { name: "Join" }).click();
+  await player2Page.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
 
   // Wait for player to join
   await expect(creatorPage.getByTestId("player-count")).toHaveText(

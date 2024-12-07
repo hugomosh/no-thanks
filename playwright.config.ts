@@ -18,4 +18,8 @@ export default defineConfig({
     url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
   },
+  reporter: [
+    ["html"], // Generates the HTML report
+    ["list"], // Keeps console output
+  ],
 });
