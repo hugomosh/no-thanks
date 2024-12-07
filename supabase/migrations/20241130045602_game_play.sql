@@ -1,6 +1,8 @@
 -- Function to initialize and start game
 create or replace function start_game(p_room_code text, p_player_id uuid) returns json
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   v_room_id uuid;

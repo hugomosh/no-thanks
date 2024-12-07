@@ -37,6 +37,8 @@ insert into word_bank (word) values
 -- Function to generate room code
 create function generate_room_code() returns text
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   result text;
@@ -57,6 +59,8 @@ $$;
 -- Function to create a new room
 create or replace function create_room(p_player_name text) returns json
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   new_room_code text;
@@ -98,6 +102,8 @@ $$;
 -- Function to join a room
 create function join_room(p_room_code text, p_player_name text) returns json
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   target_room_id uuid;

@@ -1,5 +1,8 @@
 create
-or replace function make_move (p_room_id uuid, p_player_id uuid, p_action text) returns json language plpgsql as $$
+or replace function make_move (p_room_id uuid, p_player_id uuid, p_action text) returns json language plpgsql 
+security definer
+set search_path = public
+as $$
 declare
   v_current_card integer;
   v_card_tokens integer;

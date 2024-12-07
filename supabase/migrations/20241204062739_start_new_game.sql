@@ -1,5 +1,7 @@
 create or replace function start_new_game(p_room_id uuid, p_player_id uuid) returns json
 language plpgsql
+security definer
+set search_path = public
 as $$
 declare
   v_is_creator boolean;
