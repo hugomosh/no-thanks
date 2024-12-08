@@ -38,7 +38,9 @@ test.describe("Game Play", () => {
 
     // Active player passes
     await activePlayer.getByRole("button", { name: "Pass" }).click();
-    await expect(activePlayer.getByTestId("player-tokens")).toContainText("10");
+    await expect(activePlayer.getByTestId("player-tokens-count")).toHaveText(
+      "10"
+    );
     await expect(activePlayer.getByTestId("card-tokens")).toContainText("1");
 
     // Verify turn changed
@@ -54,7 +56,7 @@ test.describe("Game Play", () => {
     await expect(waitingPlayer.getByTestId("player-cards")).toContainText(
       currentCard
     );
-    await expect(waitingPlayer.getByTestId("player-tokens")).toContainText(
+    await expect(waitingPlayer.getByTestId("player-tokens-count")).toHaveText(
       "12"
     );
   });
@@ -69,7 +71,7 @@ test.describe("Game Play", () => {
       await activePlayer.getByRole("button", { name: "Pass" }).click();
 
       // Verify token was spent
-      await expect(activePlayer.getByTestId("player-tokens")).toContainText(
+      await expect(activePlayer.getByTestId("player-tokens-count")).toHaveText(
         String(10 - i)
       );
 
@@ -81,13 +83,15 @@ test.describe("Game Play", () => {
       await waitingPlayer.getByRole("button", { name: "Pass" }).click();
 
       // Verify token was spent
-      await expect(waitingPlayer.getByTestId("player-tokens")).toContainText(
+      await expect(waitingPlayer.getByTestId("player-tokens-count")).toHaveText(
         String(10 - i)
       );
     }
 
     // Now the original active player should have 0 tokens
-    await expect(activePlayer.getByTestId("player-tokens")).toContainText("0");
+    await expect(activePlayer.getByTestId("player-tokens-count")).toHaveText(
+      "0"
+    );
     await expect(
       activePlayer.getByRole("button", { name: "Pass" })
     ).toBeDisabled();
@@ -102,7 +106,9 @@ test.describe("Game Play", () => {
 
     // First player passes
     await activePlayer.getByRole("button", { name: "Pass" }).click();
-    await expect(activePlayer.getByTestId("player-tokens")).toContainText("10");
+    await expect(activePlayer.getByTestId("player-tokens-count")).toHaveText(
+      "10"
+    );
     await expect(activePlayer.getByTestId("card-tokens")).toContainText("1");
 
     // Wait for turn to change
@@ -112,7 +118,7 @@ test.describe("Game Play", () => {
 
     // Second player passes
     await waitingPlayer.getByRole("button", { name: "Pass" }).click();
-    await expect(waitingPlayer.getByTestId("player-tokens")).toContainText(
+    await expect(waitingPlayer.getByTestId("player-tokens-count")).toHaveText(
       "10"
     );
     await expect(waitingPlayer.getByTestId("card-tokens")).toContainText("2");
@@ -124,7 +130,9 @@ test.describe("Game Play", () => {
 
     // First player takes card with accumulated tokens
     await activePlayer.getByRole("button", { name: "Take Card" }).click();
-    await expect(activePlayer.getByTestId("player-tokens")).toContainText("12"); // 10 + 2 from card
+    await expect(activePlayer.getByTestId("player-tokens-count")).toHaveText(
+      "12"
+    ); // 10 + 2 from card
     await expect(activePlayer.getByTestId("player-cards")).toContainText(
       currentCard
     );

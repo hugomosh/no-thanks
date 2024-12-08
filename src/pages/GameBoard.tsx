@@ -2,21 +2,19 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
-import { Room } from "../types";
-
-type Player = {
-  id: string;
-  name: string;
-  tokens: number;
-  cards: number[];
-};
+import { Player, Room } from "../types";
+import { PlayerCards } from "../components/game/players/PlayerCards";
+import { PlayerInfo } from "../components/game/players/PlayerInfo";
+import { MainCard } from "../components/game/cards/MainCard";
+import { Card } from "../components/game/cards/Card";
 
 type GameBoardProps = {
   roomId: string;
+  roomCode: string;
   playerId: string;
 };
 
-export function GameBoard({ roomId, playerId }: GameBoardProps) {
+export function GameBoard({ roomId, roomCode, playerId }: GameBoardProps) {
   const [currentCard, setCurrentCard] = useState<number | null>(null);
   const [cardTokens, setCardTokens] = useState(0);
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState<string | null>(
@@ -111,61 +109,104 @@ export function GameBoard({ roomId, playerId }: GameBoardProps) {
   const currentTurnPlayer = players[currentTurnPlayerId!];
 
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <div className="text-2xl">
-          Current Card: <span data-testid="current-card">{currentCard}</span>
-        </div>
-        <div data-testid="card-tokens" className="text-xl">
-          Tokens on card:{" "}
-          <span data-testid="card-tokens-count">{cardTokens}</span>
-        </div>
-      </div>
+    <div className="bg-gray-100 min-h-screen p-4">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center">
+              <div className="space-y-2">
+                <h1 className="text-2xl font-bold">No Thanks!</h1>
+                <p className="text-gray-600">Game #{roomCode}</p>
+                <p data-testid="current-turn" className="text-gray-800">
+                  {isMyTurn ? "Your turn" : `${currentTurnPlayer?.name}'s turn`}
+                </p>
+              </div>
 
-      <div data-testid="current-turn" className="mb-4">
-        {isMyTurn ? "Your turn" : `${currentTurnPlayer?.name}'s turn`}
-      </div>
-
-      <div className="mb-4">
-        <div data-testid="player-tokens">
-          Your tokens:{" "}
-          <span data-testid="player-tokens-count">{myPlayer?.tokens}</span>
-        </div>
-        <div data-testid="player-cards">
-          Your cards: {myPlayer?.cards.join(", ")}
-        </div>
-      </div>
-
-      {isMyTurn && (
-        <div className="flex gap-4">
-          <button
-            onClick={() => handleMove("take")}
-            className="px-4 py-2 bg-green-500 text-white rounded"
-          >
-            Take Card
-          </button>
-          <button
-            onClick={() => handleMove("pass")}
-            disabled={!myPlayer || myPlayer.tokens <= 0}
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
-          >
-            Pass
-          </button>
-        </div>
-      )}
-
-      {/* Other players' info */}
-      <div className="mt-4">
-        <h3>Other Players:</h3>
-        {Object.values(players)
-          .filter((p) => p.id !== playerId)
-          .map((player) => (
-            <div key={player.id} className="mb-2">
-              <div>{player.name}</div>
-              <div>Tokens: {player.tokens}</div>
-              <div>Cards: {player.cards.join(", ")}</div>
+              <PlayerInfo
+                players={players}
+                currentTurnPlayerId={currentTurnPlayerId}
+                currentPlayerId={playerId}
+              />
             </div>
-          ))}
+          </div>
+
+          {/* Main Game Area */}
+          <div className="flex flex-col items-center gap-8 mb-8">
+            <MainCard number={currentCard} tokens={cardTokens} />
+
+            {/* Action Buttons */}
+            {isMyTurn && (
+              <div className="flex gap-4">
+                <button
+                  onClick={() => handleMove("take")}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-sm hover:shadow transition-all"
+                >
+                  Take Card
+                </button>
+                <button
+                  onClick={() => handleMove("pass")}
+                  disabled={!myPlayer || myPlayer.tokens <= 0}
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold shadow-sm hover:shadow transition-all disabled:bg-gray-300"
+                >
+                  Pass (-1 Token)
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Current Player Area */}
+          {myPlayer && (
+            <div className="border-t pt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Your Cards</h2>
+              </div>
+              <div
+                className="flex flex-wrap gap-3 mb-6"
+                data-testid="player-cards"
+              >
+                {myPlayer.cards
+                  .sort((a, b) => a - b)
+                  .map((cardNumber) => (
+                    <Card key={cardNumber} number={cardNumber} size="large" />
+                  ))}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="bg-yellow-400 rounded-full w-6 h-6 border border-yellow-500"></div>
+                <span className="font-bold">
+                  ×{" "}
+                  <span data-testid="player-tokens-count">
+                    {myPlayer.tokens}
+                  </span>
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Other Players */}
+          <div className="lg:hidden mt-8 space-y-4">
+            <h2 className="text-xl font-bold">Other Players</h2>
+            {Object.values(players)
+              .filter((p) => p.id !== playerId)
+              .map((player) => (
+                <PlayerCards key={player.id} player={player} />
+              ))}
+          </div>
+        </div>
+
+        {/* Sidebar */}
+
+        <div className="hidden lg:block bg-white rounded-lg shadow-sm p-6 overflow-y-auto max-h-[calc(100vh-2rem)]">
+          <h2 className="text-xl font-bold mb-4">Other Players</h2>
+          <div className="space-y-4">
+            {Object.values(players)
+              .filter((p) => p.id !== playerId)
+              .map((player) => (
+                <PlayerCards key={player.id} player={player} isCompact={true} />
+              ))}
+          </div>
+        </div>
       </div>
     </div>
   );

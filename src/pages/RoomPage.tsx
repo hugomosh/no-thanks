@@ -149,7 +149,11 @@ export function RoomPage() {
       ) : (
         <>
           <div data-testid="game-status">Game started</div>
-          <GameBoard roomId={roomId!} playerId={myPlayerId!} />
+          <GameBoard
+            roomId={roomId!}
+            roomCode={roomCode}
+            playerId={myPlayerId!}
+          />
         </>
       )}
     </div>

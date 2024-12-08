@@ -2,6 +2,7 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import { HomePage } from "./pages/HomePage";
 import { RoomPage } from "./pages/RoomPage";
+import { Sandbox } from "./pages/Sandbox";
 import { JoinPage } from "./pages/JoinPage";
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
       <Routes>
         <Route path="" element={<HomePage />} />
         <Route path="/join" element={<JoinPage />} />
+        <Route path="/sandbox" element={<Sandbox />} />
         <Route path="/room/:roomCode" element={<RoomPage />} />
       </Routes>
     </BrowserRouter>
