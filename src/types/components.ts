@@ -13,4 +13,5 @@ export type GameBoardProps = {
 export type Score = {
   score: number;
   highlightedCards: Set<number>;
+  calculation?: string; // Add this for the calculation display
 };

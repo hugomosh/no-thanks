@@ -196,7 +196,6 @@ export function GameBoard({ roomId, roomCode, playerId }: GameBoardProps) {
         </div>
 
         {/* Sidebar */}
-
         <div className="hidden lg:block bg-white rounded-lg shadow-sm p-6 overflow-y-auto max-h-[calc(100vh-2rem)]">
           <h2 className="text-xl font-bold mb-4">Other Players</h2>
           <div className="space-y-4">

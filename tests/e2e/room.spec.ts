@@ -43,7 +43,7 @@ test.describe("Room Creation", () => {
 
     // Verify waiting for players message
     await expect(page.getByTestId("waiting-message")).toHaveText(
-      "Waiting for players to join..."
+      "Waiting for players..."
     );
 
     // Verify initial player count
