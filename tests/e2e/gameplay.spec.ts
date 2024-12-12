@@ -241,7 +241,7 @@ test.describe("Game Play", () => {
 
     // Wait for game over
     await expect(activePlayer.getByTestId("game-status")).toHaveText(
-      "Game Over!git"
+      "Game Over!"
     );
 
     // Start new game
