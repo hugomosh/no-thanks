@@ -86,7 +86,7 @@ test.describe("Room Creation", () => {
   }) => {
     // Mock Web Share API
     await page.addInitScript(() => {
-      window.navigator.share = async (data: any) => {
+      window.navigator.share = async (data: unknown) => {
         window._lastSharedData = data;
         return Promise.resolve();
       };
@@ -119,7 +119,6 @@ test.describe("Room Creation", () => {
     browser,
   }) => {
     // Mock clipboard API
-    let clipboardText = "";
     await page.addInitScript(() => {
       // Remove share API
       delete (window.navigator as any).share;
