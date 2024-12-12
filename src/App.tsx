@@ -10,7 +10,7 @@ function App() {
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="" element={<HomePage />} />
-        <Route path="/join" element={<JoinPage />} />
+        <Route path="/join/:roomCode?" element={<JoinPage />} />
         <Route path="/sandbox" element={<Sandbox />} />
         <Route path="/room/:roomCode" element={<RoomPage />} />
       </Routes>

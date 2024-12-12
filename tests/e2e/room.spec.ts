@@ -81,6 +81,107 @@ test.describe("Room Creation", () => {
     );
   });
 
+  test("should share room link using Web Share API when available", async ({
+    page,
+  }) => {
+    // Mock Web Share API
+    await page.addInitScript(() => {
+      window.navigator.share = async (data: any) => {
+        window._lastSharedData = data;
+        return Promise.resolve();
+      };
+    });
+
+    // Create room
+    await page.goto("/");
+    await page.getByTestId("player-name").fill("Creator");
+    await page.getByRole("button", { name: "Create Room" }).click();
+    await page.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
+
+    const roomCode = await page.getByTestId("room-code").textContent();
+
+    // Click share button
+    await page.getByRole("button", { name: "Share" }).click();
+
+    // Verify shared data
+    const sharedData = await page.evaluate(
+      () => (window as any)._lastSharedData
+    );
+    expect(sharedData.url).toBe(
+      `http://localhost:5173/no-thanks/join/${roomCode}`
+    );
+    expect(sharedData.title).toBe("Join my No Thanks! game");
+    expect(sharedData.text).toContain(roomCode);
+  });
+
+  test("should allow joining an existing room via link to clipboard", async ({
+    page,
+    browser,
+  }) => {
+    // Mock clipboard API
+    let clipboardText = "";
+    await page.addInitScript(() => {
+      // Remove share API
+      delete (window.navigator as any).share;
+
+      // Mock clipboard
+      Object.defineProperty(navigator, "clipboard", {
+        value: {
+          writeText: async (text: string) => {
+            (window as any)._clipboardText = text;
+            return Promise.resolve();
+          },
+        },
+      });
+    });
+
+    // Create a room first
+    await page.goto("/");
+    await page.getByTestId("player-name").fill("Player 1");
+    await page.getByRole("button", { name: "Create Room" }).click();
+
+    // Check if we're redirected to a room page
+    await page.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
+    const roomUrl = page.url();
+    const roomCode = await page.getByTestId("room-code").textContent();
+
+    // Click share button
+    await page.getByRole("button", { name: "Share" }).click();
+
+    // Verify clipboard content
+    const clipboardContent = await page.evaluate(
+      () => (window as any)._clipboardText
+    );
+    expect(clipboardContent).toBe(
+      `http://localhost:5173/no-thanks/join/${roomCode}`
+    );
+
+    // Verify success message appears and disappears
+    await expect(page.getByText("Link copied to clipboard!")).toBeVisible();
+    await expect(page.getByText("Link copied to clipboard!")).toBeHidden({
+      timeout: 3000,
+    });
+
+    // Open new browser context for second player
+    const secondPlayer = await browser.newPage();
+    await secondPlayer.goto(clipboardContent);
+
+    // Join room
+    await expect(secondPlayer.getByTestId("room-input")).toHaveValue(roomCode!);
+    await secondPlayer.getByTestId("player-name").fill("Player 2");
+    await secondPlayer.getByRole("button", { name: "Join" }).click();
+
+    // Verify redirect to room
+    await secondPlayer.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
+    await expect(secondPlayer.url()).toBe(roomUrl);
+
+    // Verify player count updated in both browsers
+    await expect(page.getByTestId("player-count")).toHaveText("Players: 2/7");
+    await expect(secondPlayer.getByTestId("player-count")).toHaveText(
+      "Players: 2/7"
+    );
+  });
+
   test("should show error when creating room without player name", async ({
     page,
   }) => {

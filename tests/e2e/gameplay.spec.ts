@@ -203,10 +203,10 @@ test.describe("Game Play", () => {
 
     // Verify game ended
     await expect(activePlayer.getByTestId("game-status")).toHaveText(
-      "Game Over"
+      "Game Over!"
     );
     await expect(waitingPlayer.getByTestId("game-status")).toHaveText(
-      "Game Over"
+      "Game Over!"
     );
 
     // Verify final scores are shown
@@ -241,7 +241,7 @@ test.describe("Game Play", () => {
 
     // Wait for game over
     await expect(activePlayer.getByTestId("game-status")).toHaveText(
-      "Game Over"
+      "Game Over!git"
     );
 
     // Start new game
