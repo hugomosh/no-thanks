@@ -118,7 +118,9 @@ export function RoomPage() {
   };
 
   const handleShare = async () => {
-    const shareUrl = `${window.location.origin}/join/${roomCode}`;
+    const baseUrl = import.meta.env.VITE_BASE_URL || window.location.origin;
+    const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+    const shareUrl = `${baseUrl}${base}/join/${roomCode}`;
 
     if (navigator.share) {
       try {
@@ -165,6 +167,8 @@ export function RoomPage() {
           </div>
           <button
             onClick={handleShare}
+            aria-label="share"
+            data-testid="share-button"
             className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
           >
             <Share2 className="w-5 h-5" />

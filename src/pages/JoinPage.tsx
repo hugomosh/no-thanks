@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Users, UserPlus } from "lucide-react";
 import { supabase } from "../lib/supabase";
 
 export function JoinPage() {
+  const { roomCode: roomCodeParam } = useParams();
   const navigate = useNavigate();
-  const [roomCode, setRoomCode] = useState("");
+  const [roomCode, setRoomCode] = useState(roomCodeParam);
   const [playerName, setPlayerName] = useState("");
   const [error, setError] = useState("");
 
