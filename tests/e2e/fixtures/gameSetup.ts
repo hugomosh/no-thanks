@@ -33,13 +33,15 @@ export async function setupTwoPlayerGame(
   await player2Page.getByRole("button", { name: "Join" }).click();
   await player2Page.waitForURL(/\/room\/[a-z]{3}-[a-z]{3}-[a-z]{3}$/);
 
-  // Wait for player to join
-  await expect(creatorPage.getByTestId("player-count")).toHaveText(
-    "Players: 2/7",
-    {
-      timeout: 25000,
-    }
-  );
+  // Wait for both pages to show correct player count
+  await Promise.all([
+    expect(creatorPage.getByTestId("player-count")).toHaveText("Players: 2/7", {
+      timeout: 30000,
+    }),
+    expect(player2Page.getByTestId("player-count")).toHaveText("Players: 2/7", {
+      timeout: 30000,
+    }),
+  ]);
 
   // Start game
   await creatorPage.getByRole("button", { name: "Start Game" }).click();
