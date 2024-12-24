@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="3" fill="#2563eb"/>
+  
+  <!-- Card - made larger -->
+  <rect x="4" y="4" width="24" height="28" rx="2" fill="white" transform="rotate(-15, 16, 16)"/>
+  
+  <!-- "NT" Text - made larger -->
+  <text x="16" y="20" font-family="Arial Black, sans-serif" font-size="16" 
+        font-weight="900" fill="#2563eb" text-anchor="middle">NT</text>
+  
+  <!-- Coins - moved slightly and made larger -->
+  <circle cx="25" cy="7" r="4" fill="#eab308"/>
+  <circle cx="28" cy="5" r="4" fill="#fcd34d"/>
+</svg>
+

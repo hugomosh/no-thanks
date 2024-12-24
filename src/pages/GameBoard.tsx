@@ -109,25 +109,25 @@ export function GameBoard({ roomId, roomCode, playerId }: GameBoardProps) {
   const currentTurnPlayer = players[currentTurnPlayerId!];
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4">
+    <div className="bg-gray-100 min-h-screen lg:p-4">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+        <div className="lg:col-span-3 bg-white rounded-lg shadow-lg lg:p-6 p-3">
           {/* Header */}
           <div className="mb-8">
             <div className="flex justify-between items-center">
-              <div className="space-y-2">
-                <h1 className="text-2xl font-bold">No Thanks!</h1>
-                <p className="text-gray-600">Game #{roomCode}</p>
-                <p data-testid="current-turn" className="text-gray-800">
-                  {isMyTurn ? "Your turn" : `${currentTurnPlayer?.name}'s turn`}
-                </p>
-              </div>
-
               <PlayerInfo
                 players={players}
                 currentTurnPlayerId={currentTurnPlayerId}
                 currentPlayerId={playerId}
               />
+            </div>
+
+            <div className="space-y-2">
+              {/*  <h1 className="text-2xl font-bold">No Thanks!</h1>
+                <p className="text-gray-600">Game #{roomCode}</p> */}
+              <p data-testid="current-turn" className="text-gray-800">
+                {isMyTurn ? "Your turn" : `${currentTurnPlayer?.name}'s turn`}
+              </p>
             </div>
           </div>
 
