@@ -255,59 +255,63 @@ export function RoomPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
-      <div className="max-w-7xl mx-auto">
-        {" "}
-        {/* Changed from max-w-2xl to max-w-7xl for GameBoard */}
-        {status === "waiting" ? (
-          <div className="max-w-2xl mx-auto">
-            {" "}
-            {/* Keep waiting room narrower */}
-            <WaitingRoom />
-          </div>
-        ) : status === "finished" ? (
-          <div className="max-w-2xl mx-auto">
-            {" "}
-            {/* Keep game over screen narrower */}
-            <GameOver />
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">No Thanks!</h1>
-                <p className="text-gray-500">Game #{roomCode}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-blue-50 px-4 py-2 rounded-lg">
-                  <span className="text-sm text-gray-500">Room:</span>
-                  <span
-                    className="font-mono text-lg font-bold text-blue-600"
-                    data-testid="room-code"
-                  >
-                    {roomCode}
-                  </span>
+    <div className=" min-w-[620px]">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-2 sm:p-4">
+        <div className="max-w-7xl mx-auto ">
+          {" "}
+          {/* Changed from max-w-2xl to max-w-7xl for GameBoard */}
+          {status === "waiting" ? (
+            <div className="max-w-2xl mx-auto">
+              {" "}
+              {/* Keep waiting room narrower */}
+              <WaitingRoom />
+            </div>
+          ) : status === "finished" ? (
+            <div className="max-w-2xl mx-auto">
+              {" "}
+              {/* Keep game over screen narrower */}
+              <GameOver />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    No Thanks!
+                  </h1>
+                  <p className="text-gray-500">Game #{roomCode}</p>
                 </div>
-                <button
-                  onClick={handleShare}
-                  className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <div className="bg-blue-50 px-4 py-2 rounded-lg">
+                    <span className="text-sm text-gray-500">Room:</span>
+                    <span
+                      className="font-mono text-lg font-bold text-blue-600"
+                      data-testid="room-code"
+                    >
+                      {roomCode}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleShare}
+                    className="p-2 text-gray-500 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div data-testid="game-status" className="sr-only">
-              Game started
-            </div>
+              <div data-testid="game-status" className="sr-only">
+                Game started
+              </div>
 
-            <GameBoard
-              roomId={roomId!}
-              roomCode={roomCode!}
-              playerId={myPlayerId!}
-            />
-          </div>
-        )}
+              <GameBoard
+                roomId={roomId!}
+                roomCode={roomCode!}
+                playerId={myPlayerId!}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
