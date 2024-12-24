@@ -14,7 +14,7 @@ type GameBoardProps = {
   playerId: string;
 };
 
-export function GameBoard({ roomId, roomCode, playerId }: GameBoardProps) {
+export function GameBoard({ roomId, playerId }: GameBoardProps) {
   const [currentCard, setCurrentCard] = useState<number | null>(null);
   const [cardTokens, setCardTokens] = useState(0);
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState<string | null>(
